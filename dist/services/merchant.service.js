@@ -9,100 +9,98 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { KYBStatus } from "../generated/prisma/enums.js";
 import prisma from "../lib/prisma.js";
-export const createStore = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log("🔍 Checking if seller already exists...");
-        // Check if wallet address already exists
-        const alreadySeller = yield prisma.seller.findUnique({
-            where: { walletAddress: payload.walletAddress },
-        });
-        if (alreadySeller) {
-            console.error("❌ Seller with this wallet address already exists");
-            throw new Error("A store with this wallet address already exists");
-        }
-        // Check if business email already exists
-        const alreadyBusinessEmail = yield prisma.seller.findUnique({
-            where: { businessEmail: payload.businessEmail },
-        });
-        if (alreadyBusinessEmail) {
-            console.error("❌ Seller with this business email already exists");
-            throw new Error("A store with this business email already exists");
-        }
-        console.log("💾 Creating new store in database...");
-        // Create new store
-        const store = yield prisma.seller.create({
-            data: {
-                shopName: payload.shopName,
-                walletAddress: payload.walletAddress,
-                businessEmail: payload.businessEmail,
-                description: payload.description,
-                contactNumber: payload.contact,
-                businessAddress: payload.address,
-                api_key: payload.api_key,
-                store_id: payload.store_id,
-                kybDocuments: payload.kybDocument,
-                logoImg: payload.logoImg,
-                isApproved: false,
-                createdAt: payload.createdAt || new Date(),
-                updatedAt: new Date(),
-            },
-        });
-        console.log("✅ Store created successfully:", store.id);
-        return store;
-    }
-    catch (err) {
-        console.error("❌ Error in createStore service:", err);
-        throw err;
-    }
-});
-export const addToprintfullCart = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log("request reached addToprintfullCart here");
-        const cart = yield prisma.cart.findUnique({
-            where: {
-                userId: payload.userId,
-            }
-        });
-        console.log(cart);
-        if (!cart) {
-            throw new Error("Cart not found for user");
-        }
-        // Check if item already exists in cart
-        const existingItem = yield prisma.cartItem.findFirst({
-            where: {
-                cartId: cart.id,
-                variantId: payload.variant_id.toString()
-            }
-        });
-        // If exists, update quantity; otherwise create new
-        if (existingItem) {
-            const updatedItem = yield prisma.cartItem.update({
-                where: { id: existingItem.id },
-                data: {
-                    quantity: existingItem.quantity + (payload.quantity || 1)
-                }
-            });
-            console.log(updatedItem);
-            return updatedItem;
-        }
-        const newCartItem = yield prisma.cartItem.create({
-            data: {
-                cartId: cart.id,
-                storeId: payload.store_id,
-                variantId: payload.variant_id, // Fixed typo here
-                quantity: payload.quantity || 1,
-                productImg: payload.productImg,
-                productName: payload.productName,
-                productPrice: payload.productPrice
-            }
-        });
-        console.log(newCartItem);
-        return newCartItem;
-    }
-    catch (err) {
-        throw err;
-    }
-});
+// export const createStore = async (payload: payloadInterface) => {
+//   try {
+//     console.log("🔍 Checking if seller already exists...");
+//     // Check if wallet address already exists
+//     const alreadySeller = await prisma.seller.findUnique({
+//       where: { walletAddress: payload.walletAddress },
+//     });
+//     if (alreadySeller) {
+//       console.error("❌ Seller with this wallet address already exists");
+//       throw new Error("A store with this wallet address already exists");
+//     }
+//     // Check if business email already exists
+//     const alreadyBusinessEmail = await prisma.seller.findUnique({
+//       where: { businessEmail: payload.businessEmail },
+//     });
+//     if (alreadyBusinessEmail) {
+//       console.error("❌ Seller with this business email already exists");
+//       throw new Error("A store with this business email already exists");
+//     }
+//     console.log("💾 Creating new store in database...");
+//     // Create new store
+//     const store = await prisma.seller.create({
+//       data: {
+//         shopName: payload.shopName,
+//         walletAddress: payload.walletAddress,
+//         businessEmail: payload.businessEmail,
+//         description: payload.description,
+//         contactNumber: payload.contact,
+//         businessAddress: payload.address ,
+//         // api_key: payload.api_key,
+//         // store_id: payload.store_id,
+//         kybDocuments: payload.kybDocument,
+//         logoImg: payload.logoImg,
+//         isApproved: false,
+//         createdAt: payload.createdAt || new Date(),
+//         updatedAt: new Date(),
+//       },
+//     });
+//     console.log("✅ Store created successfully:", store.id);
+//     return store;
+//   } catch (err: any) {
+//     console.error("❌ Error in createStore service:", err);
+//     throw err;
+//   }
+// };
+// export const addToprintfullCart = async(payload: printfullCartpayload) => {
+//   try {
+//     console.log("request reached addToprintfullCart here")
+//     const cart = await prisma.cart.findUnique({
+//       where: {
+//         userId: payload.userId,
+//       }
+//     })
+//     console.log(cart)
+//     if (!cart) {
+//       throw new Error("Cart not found for user")
+//     }
+//     // Check if item already exists in cart
+//     const existingItem = await prisma.cartItem.findFirst({
+//       where: {
+//           cartId: cart.id,
+//           variantId:payload.variant_id.toString()
+//       }
+//     })
+//     // If exists, update quantity; otherwise create new
+//     if (existingItem) {
+//       const updatedItem = await prisma.cartItem.update({
+//         where: { id: existingItem.id },
+//         data: {
+//           quantity: existingItem.quantity + (payload.quantity || 1)
+//         }
+//       })
+//       console.log(updatedItem)
+//       return updatedItem
+//     }
+//     const newCartItem = await prisma.cartItem.create({
+//       data: {
+//         cartId: cart.id,
+//         // storeId: payload.store_id,
+//         variantId: payload.variant_id, // Fixed typo here
+//         quantity: payload.quantity || 1,
+//         productImg:payload.productImg,
+//         productName:payload.productName,
+//         productPrice : payload.productPrice
+//       } 
+//     }) 
+//     console.log(newCartItem)
+//     return newCartItem
+//   } catch (err) {
+//     throw err
+//   }
+// }
 export const getAllStores = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         //this is the correct format 
@@ -292,61 +290,23 @@ export function updateMerchantVerification(merchantId, status, rejectionReason) 
 }
 export function getAllMerchants() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const allMerchants = yield prisma.seller.findMany({
-                select: {
-                    id: true,
-                    shopName: true,
-                    businessEmail: true,
-                    contactNumber: true,
-                    businessAddress: true,
-                    createdAt: true,
-                    kybStatus: true,
-                    isApproved: true,
-                    logoImg: true,
-                    description: true
-                },
-                orderBy: {
-                    createdAt: 'desc'
-                }
-            });
-            return allMerchants;
-        }
-        catch (error) {
-            console.error("Error in getAllMerchants:", error);
-            throw error;
-        }
+        return yield prisma.seller.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
     });
 }
 export function getMerchantsByStatus(status) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const merchants = yield prisma.seller.findMany({
-                where: {
-                    kybStatus: status
-                },
-                select: {
-                    id: true,
-                    shopName: true,
-                    businessEmail: true,
-                    contactNumber: true,
-                    businessAddress: true,
-                    createdAt: true,
-                    kybStatus: true,
-                    isApproved: true,
-                    logoImg: true,
-                    description: true
-                },
-                orderBy: {
-                    createdAt: 'desc'
-                }
-            });
-            return merchants;
-        }
-        catch (error) {
-            console.error("Error in getMerchantsByStatus:", error);
-            throw error;
-        }
+        return yield prisma.seller.findMany({
+            where: {
+                kybStatus: status
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
     });
 }
 export const getStoreWalletAddress = (storeId) => __awaiter(void 0, void 0, void 0, function* () {
